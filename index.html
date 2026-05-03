@@ -10,11 +10,9 @@
 <title>Mileage Logger</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
   :root {
     --navy: #0f172a;
-    --navy-mid: #1e293b;
-    --navy-light: #334155;
     --accent: #38bdf8;
     --accent-dim: #0ea5e9;
     --text: #f1f5f9;
@@ -28,252 +26,87 @@
     --radius: 16px;
     --radius-sm: 10px;
   }
-
-  html, body {
-    height: 100%;
-    background: var(--navy);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    overscroll-behavior: none;
-  }
-
-  body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-  }
-
-  .app {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    max-width: 480px;
-    margin: 0 auto;
-    width: 100%;
-    padding: env(safe-area-inset-top, 20px) 20px env(safe-area-inset-bottom, 20px);
-  }
-
-  /* Header */
-  .header {
-    padding: 24px 0 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
+ 
+  html, body { height: 100%; background: var(--navy); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; overscroll-behavior: none; }
+  body { display: flex; flex-direction: column; min-height: 100vh; min-height: -webkit-fill-available; }
+ 
+  .app { flex: 1; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; width: 100%; padding: env(safe-area-inset-top, 20px) 20px env(safe-area-inset-bottom, 20px); }
+ 
+  .header { padding: 24px 0 20px; display: flex; align-items: center; justify-content: space-between; }
   .header-left { display: flex; align-items: center; gap: 12px; }
-
-  .logo-mark {
-    width: 42px; height: 42px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dim));
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-  }
-
+  .logo-mark { width: 42px; height: 42px; background: linear-gradient(135deg, var(--accent), var(--accent-dim)); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
   .logo-mark svg { width: 22px; height: 22px; }
-
   .header-title { font-size: 17px; font-weight: 600; color: var(--text); }
   .header-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
-
-  .user-pill {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 5px 10px 5px 6px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+ 
+  .refresh-btn { width: 34px; height: 34px; background: var(--surface); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .refresh-btn:hover { background: var(--surface2); }
+  .refresh-btn svg { width: 15px; height: 15px; stroke: var(--text-muted); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .refresh-btn.spinning svg { animation: spin 0.8s linear infinite; }
+ 
+  .user-pill { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 5px 10px 5px 6px; cursor: pointer; transition: background 0.2s; }
   .user-pill:hover { background: var(--surface2); }
-  .user-avatar {
-    width: 24px; height: 24px; border-radius: 50%;
-    background: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 700; color: var(--navy);
-  }
+  .user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--navy); }
   .user-pill-name { font-size: 12px; color: var(--text-muted); max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  /* Sign in screen */
-  #signin-screen {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 12px;
-    padding-bottom: 60px;
-  }
-
-  .signin-icon {
-    width: 80px; height: 80px;
-    background: var(--surface);
-    border-radius: 24px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 8px;
-    border: 1px solid var(--border);
-  }
-
+ 
+  #signin-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding-bottom: 60px; }
+  .signin-icon { width: 80px; height: 80px; background: var(--surface); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; border: 1px solid var(--border); }
   .signin-icon svg { width: 40px; height: 40px; }
-
   #signin-screen h2 { font-size: 22px; font-weight: 700; }
   #signin-screen p { font-size: 14px; color: var(--text-muted); line-height: 1.6; max-width: 280px; }
-
-  .google-btn {
-    display: flex; align-items: center; gap: 10px;
-    background: #fff;
-    color: #1f1f1f;
-    border: none;
-    border-radius: 12px;
-    padding: 14px 24px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 12px;
-    transition: transform 0.15s, box-shadow 0.15s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    width: 100%;
-    max-width: 300px;
-    justify-content: center;
-  }
+ 
+  .google-btn { display: flex; align-items: center; gap: 10px; background: #fff; color: #1f1f1f; border: none; border-radius: 12px; padding: 14px 24px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: transform 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.25); width: 100%; max-width: 300px; justify-content: center; }
   .google-btn:active { transform: scale(0.97); }
-
-  /* Main app */
+ 
   #main-screen { flex: 1; display: none; flex-direction: column; gap: 14px; }
-
-  /* Date card */
-  .date-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
+ 
+  .date-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
   .date-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 4px; }
   .date-value { font-size: 15px; font-weight: 500; color: var(--text); }
   .date-time { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
-
-  /* Input cards */
+ 
+  /* Last mileage card */
+  .last-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+  .last-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .last-card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
+  .last-card-tag { font-size: 10px; background: rgba(56,189,248,0.1); color: var(--accent); border-radius: 6px; padding: 2px 8px; border: 1px solid rgba(56,189,248,0.2); }
+  .last-mileage-num { font-size: 36px; font-weight: 800; color: var(--text); letter-spacing: -1px; line-height: 1; }
+  .last-mileage-unit { font-size: 14px; color: var(--text-muted); margin-left: 4px; }
+  .last-meta { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
+  .last-loading { font-size: 14px; color: var(--text-dim); font-style: italic; }
+ 
   .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  .input-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    transition: border-color 0.2s;
-  }
+  .input-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; transition: border-color 0.2s; }
   .input-card:focus-within { border-color: var(--accent); }
-
   .input-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 8px; }
-
-  .mileage-input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    outline: none;
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text);
-    font-family: inherit;
-    -moz-appearance: textfield;
-  }
-  .mileage-input::-webkit-outer-spin-button,
-  .mileage-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .mileage-input { width: 100%; background: transparent; border: none; outline: none; font-size: 26px; font-weight: 700; color: var(--text); font-family: inherit; -moz-appearance: textfield; }
+  .mileage-input::-webkit-outer-spin-button, .mileage-input::-webkit-inner-spin-button { -webkit-appearance: none; }
   .mileage-input::placeholder { color: var(--text-dim); font-weight: 400; font-size: 20px; }
-
-  /* Diff card */
-  .diff-card {
-    background: linear-gradient(135deg, #0c4a6e 0%, #0f172a 100%);
-    border: 1px solid rgba(56,189,248,0.25);
-    border-radius: var(--radius);
-    padding: 20px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-
+ 
+  .diff-card { background: linear-gradient(135deg, #0c4a6e 0%, #0f172a 100%); border: 1px solid rgba(56,189,248,0.25); border-radius: var(--radius); padding: 20px; display: flex; align-items: center; justify-content: space-between; }
   .diff-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(148,163,184,0.7); margin-bottom: 6px; }
   .diff-value { font-size: 42px; font-weight: 800; color: var(--accent); letter-spacing: -1px; line-height: 1; }
   .diff-unit { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
   .diff-icon { opacity: 0.15; }
   .diff-icon svg { width: 56px; height: 56px; }
-
-  /* Submit button */
-  .submit-btn {
-    width: 100%;
-    padding: 18px;
-    background: var(--accent);
-    color: var(--navy);
-    border: none;
-    border-radius: var(--radius);
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.15s, opacity 0.2s, background 0.2s;
-    letter-spacing: 0.01em;
-    margin-top: 4px;
-  }
+ 
+  .submit-btn { width: 100%; padding: 18px; background: var(--accent); color: var(--navy); border: none; border-radius: var(--radius); font-size: 16px; font-weight: 700; cursor: pointer; transition: transform 0.15s, opacity 0.2s; letter-spacing: 0.01em; margin-top: 4px; }
   .submit-btn:not(:disabled):active { transform: scale(0.97); }
   .submit-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-
-  /* Status toast */
-  .toast {
-    position: fixed;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
-    left: 50%; transform: translateX(-50%) translateY(80px);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 20px;
-    font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
-    opacity: 0;
-    z-index: 100;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  }
+ 
+  .toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; font-size: 14px; font-weight: 500; white-space: nowrap; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s; opacity: 0; z-index: 100; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
   .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
   .toast.success { border-color: rgba(74,222,128,0.3); color: var(--success); }
   .toast.error { border-color: rgba(248,113,113,0.3); color: var(--error); }
   .toast.info { border-color: rgba(56,189,248,0.3); color: var(--accent); }
-
-  /* History section */
-  .section-title {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
-    color: var(--text-dim); margin-top: 8px; margin-bottom: 10px;
-  }
-
-  .history-list { display: flex; flex-direction: column; gap: 8px; }
-
-  .history-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 12px 16px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .history-date { font-size: 12px; color: var(--text-muted); }
-  .history-miles { font-size: 16px; font-weight: 700; color: var(--accent); }
-  .history-range { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
-
-  .empty-history { text-align: center; color: var(--text-dim); font-size: 13px; padding: 20px 0; }
-
-  /* Spinner */
-  .spinner {
-    display: inline-block; width: 18px; height: 18px;
-    border: 2px solid rgba(15,23,42,0.3);
-    border-top-color: var(--navy);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    vertical-align: middle;
-  }
+ 
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(15,23,42,0.3); border-top-color: var(--navy); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
-
+ 
 <div class="app">
   <div class="header">
     <div class="header-left">
@@ -289,13 +122,17 @@
         <div class="header-sub">Ionmas Ltd · Lease Car</div>
       </div>
     </div>
-    <div id="user-pill" class="user-pill" style="display:none" onclick="signOut()">
-      <div class="user-avatar" id="user-initial">D</div>
-      <span class="user-pill-name" id="user-name-label">Daniel</span>
+    <div class="header-right">
+      <button class="refresh-btn" id="refresh-btn" onclick="refreshLastMileage()" style="display:none" title="Refresh from sheet">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+      <div id="user-pill" class="user-pill" style="display:none" onclick="signOut()">
+        <div class="user-avatar" id="user-initial">D</div>
+        <span class="user-pill-name" id="user-name-label">Daniel</span>
+      </div>
     </div>
   </div>
-
-  <!-- Sign in -->
+ 
   <div id="signin-screen">
     <div class="signin-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round">
@@ -316,10 +153,9 @@
       Sign in with Google
     </button>
   </div>
-
-  <!-- Main app -->
+ 
   <div id="main-screen">
-
+ 
     <div class="date-card">
       <div>
         <div class="date-label">Today</div>
@@ -327,7 +163,17 @@
       </div>
       <div class="date-time" id="time-str">—</div>
     </div>
-
+ 
+    <div class="last-card">
+      <div class="last-card-header">
+        <span class="last-card-title">Last recorded mileage</span>
+        <span class="last-card-tag">Live from sheet</span>
+      </div>
+      <div id="last-mileage-display">
+        <span class="last-loading">Loading...</span>
+      </div>
+    </div>
+ 
     <div class="input-row">
       <div class="input-card">
         <div class="input-label">Start mileage</div>
@@ -338,7 +184,7 @@
         <input class="mileage-input" type="number" id="end-mi" placeholder="0" inputmode="numeric" oninput="calcDiff()">
       </div>
     </div>
-
+ 
     <div class="diff-card">
       <div>
         <div class="diff-label">Miles travelled</div>
@@ -352,33 +198,22 @@
         </svg>
       </div>
     </div>
-
-    <button class="submit-btn" id="submit-btn" onclick="submitEntry()" disabled>
-      Log Journey
-    </button>
-
-    <div class="section-title">Recent journeys</div>
-    <div class="history-list" id="history-list">
-      <div class="empty-history">No journeys logged yet</div>
-    </div>
-
+ 
+    <button class="submit-btn" id="submit-btn" onclick="submitEntry()" disabled>Log Journey</button>
+ 
   </div>
 </div>
-
+ 
 <div class="toast" id="toast"></div>
-
+ 
 <script>
 const CLIENT_ID = '2381011763-3m0eedesk4r4oa6sfpbsepf33fahvp6l.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile';
-const SHEET_NAME = 'Lease Car Mileage';
 const FIXED_SHEET_ID = '1hMNdD5ur7rgmd-fVlnPtArvcR-zo9bw3BRgTITWTJ4A';
 const REDIRECT_URI = window.location.href.split('?')[0].split('#')[0];
-
+ 
 let accessToken = null;
-let sheetId = FIXED_SHEET_ID;
-let history = JSON.parse(localStorage.getItem('mileage_history') || '[]');
-
-// Clock
+ 
 function updateClock() {
   const now = new Date();
   document.getElementById('date-str').textContent = now.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'long', year:'numeric' });
@@ -386,8 +221,7 @@ function updateClock() {
 }
 setInterval(updateClock, 1000);
 updateClock();
-
-// Diff calculator
+ 
 function calcDiff() {
   const s = parseFloat(document.getElementById('start-mi').value);
   const e = parseFloat(document.getElementById('end-mi').value);
@@ -407,8 +241,7 @@ function calcDiff() {
     btn.disabled = true;
   }
 }
-
-// Toast
+ 
 let toastTimer;
 function showToast(msg, type='info') {
   const t = document.getElementById('toast');
@@ -417,8 +250,7 @@ function showToast(msg, type='info') {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { t.className = 'toast'; }, 3500);
 }
-
-// Auth
+ 
 function signIn() {
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
@@ -429,135 +261,103 @@ function signIn() {
   });
   window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
 }
-
+ 
 function signOut() {
   if (!confirm('Sign out?')) return;
   accessToken = null;
-  sheetId = null;
   sessionStorage.removeItem('mileage_token');
   document.getElementById('signin-screen').style.display = '';
   document.getElementById('main-screen').style.display = 'none';
   document.getElementById('user-pill').style.display = 'none';
+  document.getElementById('refresh-btn').style.display = 'none';
 }
-
+ 
 async function getUserInfo() {
-  const r = await fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
-    headers: { Authorization: 'Bearer ' + accessToken }
-  });
-  const d = await r.json();
-  const name = d.given_name || d.name || 'User';
-  document.getElementById('user-name-label').textContent = name;
-  document.getElementById('user-initial').textContent = name[0].toUpperCase();
-  document.getElementById('user-pill').style.display = 'flex';
+  try {
+    const r = await fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', { headers: { Authorization: 'Bearer ' + accessToken } });
+    const d = await r.json();
+    const name = d.given_name || d.name || 'User';
+    document.getElementById('user-name-label').textContent = name;
+    document.getElementById('user-initial').textContent = name[0].toUpperCase();
+    document.getElementById('user-pill').style.display = 'flex';
+  } catch(e) {}
 }
-
+ 
 function handleToken(token) {
   accessToken = token;
   sessionStorage.setItem('mileage_token', token);
   document.getElementById('signin-screen').style.display = 'none';
   document.getElementById('main-screen').style.display = 'flex';
   document.getElementById('main-screen').style.flexDirection = 'column';
+  document.getElementById('refresh-btn').style.display = 'flex';
   getUserInfo();
-  renderHistory();
-  getOrCreateSheet();
+  refreshLastMileage();
 }
-
-// Google Sheets
-async function getOrCreateSheet() {
-  sheetId = FIXED_SHEET_ID; return; // Always use fixed sheet
-  // Old dynamic creation below (disabled):
-  const stored = localStorage.getItem('mileage_sheet_id');
-  if (stored) { sheetId = stored; return; }
-  showToast('Creating your Google Sheet...', 'info');
+ 
+async function refreshLastMileage() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  const display = document.getElementById('last-mileage-display');
+  display.innerHTML = '<span class="last-loading">Loading from sheet...</span>';
   try {
-    const r = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        properties: { title: SHEET_NAME },
-        sheets: [{ properties: { title: 'Mileage Log' } }]
-      })
-    });
-    const d = await r.json();
-    sheetId = d.spreadsheetId;
-    localStorage.setItem('mileage_sheet_id', sheetId);
-    await addHeaderRow();
-    showToast('Sheet created in Google Drive!', 'success');
+    const r = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}/values/A:D`,
+      { headers: { Authorization: 'Bearer ' + accessToken } }
+    );
+    const data = await r.json();
+    const rows = (data.values || []).slice(1).filter(row => row && row[2] && !isNaN(parseFloat(row[2])));
+    if (rows.length === 0) {
+      display.innerHTML = '<span class="last-loading">No journeys recorded yet</span>';
+    } else {
+      const last = rows[rows.length - 1];
+      const lastEnd = parseFloat(last[2]);
+      const lastDate = last[0] || '';
+      const lastMiles = last[3] ? Math.round(parseFloat(last[3])) : null;
+      display.innerHTML = `
+        <div>
+          <span class="last-mileage-num">${lastEnd.toLocaleString('en-GB')}</span>
+          <span class="last-mileage-unit">miles</span>
+        </div>
+        <div class="last-meta">Logged ${lastDate}${lastMiles !== null ? ' &nbsp;·&nbsp; ' + lastMiles.toLocaleString() + ' miles that journey' : ''}</div>
+      `;
+    }
   } catch(e) {
-    showToast('Could not create sheet: ' + e.message, 'error');
+    display.innerHTML = '<span class="last-loading" style="color:var(--error)">Could not load — tap ↺ to retry</span>';
   }
+  btn.classList.remove('spinning');
 }
-
-async function addHeaderRow() {
-  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:D1?valueInputOption=RAW`, {
-    method: 'PUT',
-    headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ values: [['Date & Time', 'Starting Mileage', 'Ending Mileage', 'Miles Travelled']] })
-  });
-}
-
+ 
 async function appendRow(row) {
-  const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A:D:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, {
-    method: 'POST',
-    headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ values: [row] })
-  });
+  const r = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}/values/A:D:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
+    { method: 'POST', headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [row] }) }
+  );
   if (!r.ok) throw new Error('Sheet write failed');
 }
-
+ 
 async function submitEntry() {
   const s = parseFloat(document.getElementById('start-mi').value);
   const e = parseFloat(document.getElementById('end-mi').value);
   if (isNaN(s) || isNaN(e) || e <= s) return;
   const diff = Math.round(e - s);
-  const now = new Date();
-  const dateStr = now.toLocaleString('en-GB');
-
+  const dateStr = new Date().toLocaleString('en-GB');
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>';
-
   try {
-    if (!sheetId) await getOrCreateSheet();
     await appendRow([dateStr, s, e, diff]);
-    const entry = { date: dateStr, start: s, end: e, diff };
-    history.unshift(entry);
-    if (history.length > 10) history = history.slice(0, 10);
-    localStorage.setItem('mileage_history', JSON.stringify(history));
-    renderHistory();
     document.getElementById('start-mi').value = '';
     document.getElementById('end-mi').value = '';
     calcDiff();
     showToast('Journey logged — ' + diff + ' miles saved!', 'success');
+    refreshLastMileage();
   } catch(err) {
     showToast('Error saving: ' + err.message, 'error');
   }
-
   btn.disabled = false;
   btn.textContent = 'Log Journey';
 }
-
-function renderHistory() {
-  const list = document.getElementById('history-list');
-  if (!history.length) {
-    list.innerHTML = '<div class="empty-history">No journeys logged yet</div>';
-    return;
-  }
-  list.innerHTML = history.slice(0, 5).map(h => `
-    <div class="history-item">
-      <div>
-        <div class="history-date">${h.date}</div>
-        <div class="history-range">${h.start.toLocaleString()} → ${h.end.toLocaleString()}</div>
-      </div>
-      <div>
-        <div class="history-miles">${h.diff.toLocaleString()}</div>
-        <div class="history-range" style="text-align:right">miles</div>
-      </div>
-    </div>
-  `).join('');
-}
-
-// Init — check for token in URL hash (after Google redirect)
+ 
 (function init() {
   const hash = window.location.hash;
   if (hash) {
@@ -565,36 +365,29 @@ function renderHistory() {
     const token = params.get('access_token');
     if (token) {
       handleToken(token);
-      history.replaceState(null, '', window.location.pathname);
+      window.history.replaceState(null, '', window.location.pathname);
       return;
     }
   }
   const stored = sessionStorage.getItem('mileage_token');
-  if (stored) { handleToken(stored); return; }
+  if (stored) { handleToken(stored); }
 })();
 </script>
-
-<!-- PWA manifest inline -->
+ 
 <script>
 const manifest = {
-  name: 'Mileage Logger',
-  short_name: 'Mileage',
+  name: 'Mileage Logger', short_name: 'Mileage',
   description: 'Lease car mileage tracker for Ionmas Ltd',
-  start_url: window.location.href,
-  display: 'standalone',
-  background_color: '#0f172a',
-  theme_color: '#0f172a',
-  icons: [{
-    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230f172a'/%3E%3Cpath d='M40 130h-16a16 16 0 0 1-16-16V50a16 16 0 0 1 16-16h88a16 16 0 0 1 16 16v24' stroke='%2338bdf8' stroke-width='16' stroke-linecap='round' fill='none'/%3E%3Crect x='72' y='88' width='112' height='80' rx='16' stroke='%2338bdf8' stroke-width='16' fill='none'/%3E%3Ccircle cx='96' cy='128' r='8' fill='%2338bdf8'/%3E%3Ccircle cx='160' cy='128' r='8' fill='%2338bdf8'/%3E%3C/svg%3E",
-    sizes: '192x192', type: 'image/svg+xml'
-  }]
+  start_url: window.location.href, display: 'standalone',
+  background_color: '#0f172a', theme_color: '#0f172a',
+  icons: [{ src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230f172a'/%3E%3Cpath d='M40 130h-16a16 16 0 0 1-16-16V50a16 16 0 0 1 16-16h88a16 16 0 0 1 16 16v24' stroke='%2338bdf8' stroke-width='16' stroke-linecap='round' fill='none'/%3E%3Crect x='72' y='88' width='112' height='80' rx='16' stroke='%2338bdf8' stroke-width='16' fill='none'/%3E%3Ccircle cx='96' cy='128' r='8' fill='%2338bdf8'/%3E%3Ccircle cx='160' cy='128' r='8' fill='%2338bdf8'/%3E%3C/svg%3E", sizes: '192x192', type: 'image/svg+xml' }]
 };
 const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-const url = URL.createObjectURL(blob);
-const link = document.createElement('link');
-link.rel = 'manifest'; link.href = url;
-document.head.appendChild(link);
+const u = URL.createObjectURL(blob);
+const lnk = document.createElement('link');
+lnk.rel = 'manifest'; lnk.href = u;
+document.head.appendChild(lnk);
 </script>
-
+ 
 </body>
 </html>
