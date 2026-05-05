@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f172a">
+<title>Mileage Logger</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0f172a; --accent: #38bdf8; --accent-dim: #0ea5e9;
+    --text: #f1f5f9; --text-muted: #94a3b8; --text-dim: #64748b;
+    --surface: #1e293b; --surface2: #263348;
+    --border: rgba(148,163,184,0.12);
+    --success: #4ade80; --error: #f87171; --warning: #fbbf24;
+    --radius: 16px; --radius-sm: 10px;
+  }
+  html, body { height: 100%; background: var(--navy); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; overscroll-behavior: none; }
+  body { display: flex; flex-direction: column; min-height: 100vh; min-height: -webkit-fill-available; }
+  .app { flex: 1; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; width: 100%; padding: env(safe-area-inset-top, 20px) 20px env(safe-area-inset-bottom, 20px); gap: 0; }
+
+  /* Header */
+  .header { padding: 24px 0 20px; display: flex; align-items: center; justify-content: space-between; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo-mark { width: 42px; height: 42px; background: linear-gradient(135deg, var(--accent), var(--accent-dim)); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .logo-mark svg { width: 22px; height: 22px; }
+  .header-title { font-size: 17px; font-weight: 600; }
+  .header-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .refresh-btn { width: 34px; height: 34px; background: var(--surface); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .refresh-btn:hover { background: var(--surface2); }
+  .refresh-btn svg { width: 15px; height: 15px; stroke: var(--text-muted); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .refresh-btn.spinning svg { animation: spin 0.8s linear infinite; }
+  .user-pill { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 5px 10px 5px 6px; cursor: pointer; transition: background 0.2s; }
+  .user-pill:hover { background: var(--surface2); }
+  .user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--navy); }
+  .user-pill-name { font-size: 12px; color: var(--text-muted); max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Sign in */
+  #signin-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding-bottom: 60px; }
+  .signin-icon { width: 80px; height: 80px; background: var(--surface); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; border: 1px solid var(--border); }
+  .signin-icon svg { width: 40px; height: 40px; }
+  #signin-screen h2 { font-size: 22px; font-weight: 700; }
+  #signin-screen p { font-size: 14px; color: var(--text-muted); line-height: 1.6; max-width: 280px; }
+  .google-btn { display: flex; align-items: center; gap: 10px; background: #fff; color: #1f1f1f; border: none; border-radius: 12px; padding: 14px 24px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: transform 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.25); width: 100%; max-width: 300px; justify-content: center; }
+  .google-btn:active { transform: scale(0.97); }
+
+  /* Main */
+  #main-screen { flex: 1; display: none; flex-direction: column; gap: 14px; }
+
+  /* Date card */
+  .date-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .date-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 4px; }
+  .date-value { font-size: 15px; font-weight: 500; }
+  .date-time { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+
+  /* Last mileage */
+  .last-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+  .last-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .last-card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
+  .last-card-tag { font-size: 10px; background: rgba(56,189,248,0.1); color: var(--accent); border-radius: 6px; padding: 2px 8px; border: 1px solid rgba(56,189,248,0.2); }
+  .last-mileage-num { font-size: 36px; font-weight: 800; color: var(--text); letter-spacing: -1px; line-height: 1; }
+  .last-mileage-unit { font-size: 14px; color: var(--text-muted); margin-left: 4px; }
+  .last-meta { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
+  .last-loading { font-size: 14px; color: var(--text-dim); font-style: italic; }
+
+  /* Journey panels */
+  .journey-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* Status banner */
+  .status-banner { border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+  .status-banner.open { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); color: var(--warning); }
+  .status-banner.ready { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.2); color: var(--accent); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .status-dot.open { background: var(--warning); box-shadow: 0 0 6px var(--warning); animation: pulse 1.5s infinite; }
+  .status-dot.ready { background: var(--accent); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* Info row (shows start details when completing) */
+  .info-row { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px 14px; }
+  .info-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 6px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .info-item-label { font-size: 11px; color: var(--text-dim); margin-bottom: 2px; }
+  .info-item-value { font-size: 18px; font-weight: 700; color: var(--text-muted); }
+
+  /* Input */
+  .input-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 8px; }
+  .input-wrap { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; transition: border-color 0.2s; }
+  .input-wrap:focus-within { border-color: var(--accent); }
+  .mileage-input { width: 100%; background: transparent; border: none; outline: none; font-size: 32px; font-weight: 700; color: var(--text); font-family: inherit; -moz-appearance: textfield; }
+  .mileage-input::-webkit-outer-spin-button, .mileage-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .mileage-input::placeholder { color: var(--text-dim); font-weight: 400; font-size: 24px; }
+
+  /* Calculated diff display */
+  .diff-preview { background: linear-gradient(135deg, #0c4a6e 0%, #0f172a 100%); border: 1px solid rgba(56,189,248,0.2); border-radius: var(--radius-sm); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .diff-preview-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(148,163,184,0.6); margin-bottom: 4px; }
+  .diff-preview-val { font-size: 28px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .diff-preview-unit { font-size: 13px; color: var(--text-muted); }
+
+  /* Warning */
+  .warning-box { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--error); display: none; }
+  .warning-box.show { display: block; }
+
+  /* Buttons */
+  .btn-primary { width: 100%; padding: 16px; background: var(--accent); color: var(--navy); border: none; border-radius: var(--radius-sm); font-size: 16px; font-weight: 700; cursor: pointer; transition: transform 0.15s, opacity 0.2s; }
+  .btn-primary:not(:disabled):active { transform: scale(0.97); }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary.danger { background: var(--error); color: #fff; }
+  .btn-secondary { width: 100%; padding: 13px; background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+  .btn-secondary:hover { background: var(--surface2); }
+
+  /* Toast */
+  .toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; font-size: 14px; font-weight: 500; white-space: nowrap; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s; opacity: 0; z-index: 100; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.success { border-color: rgba(74,222,128,0.3); color: var(--success); }
+  .toast.error { border-color: rgba(248,113,113,0.3); color: var(--error); }
+  .toast.info { border-color: rgba(56,189,248,0.3); color: var(--accent); }
+
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(15,23,42,0.3); border-top-color: var(--navy); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/>
+          <rect x="9" y="11" width="14" height="10" rx="2"/>
+          <circle cx="12" cy="16" r="1"/><circle cx="20" cy="16" r="1"/>
+        </svg>
+      </div>
+      <div>
+        <div class="header-title">Mileage Logger</div>
+        <div class="header-sub">Ionmas Ltd · Lease Car</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()" style="display:none" title="Refresh">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+      <div id="user-pill" class="user-pill" style="display:none" onclick="signOut()">
+        <div class="user-avatar" id="user-initial">D</div>
+        <span class="user-pill-name" id="user-name-label">Daniel</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sign in screen -->
+  <div id="signin-screen">
+    <div class="signin-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round">
+        <path d="M9 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </div>
+    <h2>Sign in to start</h2>
+    <p>Connect your Google account to log your lease car mileage.</p>
+    <button class="google-btn" onclick="signIn()">
+      <svg width="18" height="18" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      Sign in with Google
+    </button>
+  </div>
+
+  <!-- Main screen -->
+  <div id="main-screen">
+
+    <!-- Date/time -->
+    <div class="date-card">
+      <div>
+        <div class="date-label">Today</div>
+        <div class="date-value" id="date-str">—</div>
+      </div>
+      <div class="date-time" id="time-str">—</div>
+    </div>
+
+    <!-- Last completed mileage -->
+    <div class="last-card">
+      <div class="last-card-header">
+        <span class="last-card-title">Last completed mileage</span>
+        <span class="last-card-tag">Live from sheet</span>
+      </div>
+      <div id="last-mileage-display">
+        <span class="last-loading">Loading...</span>
+      </div>
+    </div>
+
+    <!-- START JOURNEY PANEL -->
+    <div class="journey-panel" id="start-panel">
+      <div class="status-banner ready">
+        <div class="status-dot ready"></div>
+        No open journey — ready to start
+      </div>
+      <div>
+        <div class="input-label">Start mileage</div>
+        <div class="input-wrap">
+          <input class="mileage-input" type="number" id="start-input" placeholder="Enter mileage" inputmode="numeric" oninput="onStartInput()">
+        </div>
+      </div>
+      <button class="btn-primary" id="start-btn" onclick="startJourney()" disabled>Start Journey</button>
+    </div>
+
+    <!-- COMPLETE JOURNEY PANEL (hidden until open journey found) -->
+    <div class="journey-panel" id="end-panel" style="display:none">
+      <div class="status-banner open">
+        <div class="status-dot open"></div>
+        Journey in progress — please enter end mileage
+      </div>
+
+      <!-- Read-only start details -->
+      <div class="info-row">
+        <div class="info-label">Journey started</div>
+        <div class="info-grid">
+          <div>
+            <div class="info-item-label">Start mileage</div>
+            <div class="info-item-value" id="open-start-mi">—</div>
+          </div>
+          <div>
+            <div class="info-item-label">Started at</div>
+            <div class="info-item-value" id="open-start-date">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- End mileage input -->
+      <div>
+        <div class="input-label">End mileage</div>
+        <div class="input-wrap">
+          <input class="mileage-input" type="number" id="end-input" placeholder="Enter mileage" inputmode="numeric" oninput="onEndInput()">
+        </div>
+      </div>
+
+      <!-- Warning -->
+      <div class="warning-box" id="end-warning">⚠ End mileage must be greater than start mileage</div>
+
+      <!-- Calculated diff -->
+      <div class="diff-preview" id="diff-preview" style="display:none">
+        <div>
+          <div class="diff-preview-label">Miles this journey</div>
+          <div class="diff-preview-val" id="diff-preview-val">—</div>
+          <div class="diff-preview-unit">miles</div>
+        </div>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.3"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      </div>
+
+      <button class="btn-primary" id="end-btn" onclick="completeJourney()" disabled>Complete Journey</button>
+      <button class="btn-secondary" onclick="cancelJourney()">Cancel / Abandon Journey</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CLIENT_ID = '2381011763-3m0eedesk4r4oa6sfpbsepf33fahvp6l.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile';
+const FIXED_SHEET_ID = '1hMNdD5ur7rgmd-fVlnPtArvcR-zo9bw3BRgTITWTJ4A';
+const REDIRECT_URI = window.location.href.split('?')[0].split('#')[0];
+
+let accessToken = null;
+let openJourneyRow = null; // row index (1-based) of the open journey in the sheet
+
+// ── Clock ──────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('date-str').textContent = now.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'long', year:'numeric' });
+  document.getElementById('time-str').textContent = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Toast ──────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = 'toast'; }, 4000);
+}
+
+// ── Auth ───────────────────────────────────────────────
+function signIn() {
+  const params = new URLSearchParams({ client_id: CLIENT_ID, redirect_uri: REDIRECT_URI, response_type: 'token', scope: SCOPES, include_granted_scopes: 'true' });
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
+}
+
+function signOut() {
+  if (!confirm('Sign out?')) return;
+  accessToken = null;
+  sessionStorage.removeItem('mileage_token');
+  document.getElementById('signin-screen').style.display = '';
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('user-pill').style.display = 'none';
+  document.getElementById('refresh-btn').style.display = 'none';
+}
+
+async function getUserInfo() {
+  try {
+    const r = await fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', { headers: { Authorization: 'Bearer ' + accessToken } });
+    const d = await r.json();
+    const name = d.given_name || d.name || 'User';
+    document.getElementById('user-name-label').textContent = name;
+    document.getElementById('user-initial').textContent = name[0].toUpperCase();
+    document.getElementById('user-pill').style.display = 'flex';
+  } catch(e) {}
+}
+
+function handleToken(token) {
+  accessToken = token;
+  sessionStorage.setItem('mileage_token', token);
+  document.getElementById('signin-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'flex';
+  document.getElementById('main-screen').style.flexDirection = 'column';
+  document.getElementById('refresh-btn').style.display = 'flex';
+  getUserInfo();
+  refreshAll();
+}
+
+// ── Sheet helpers ──────────────────────────────────────
+async function getSheetData() {
+  const r = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}/values/A:E`,
+    { headers: { Authorization: 'Bearer ' + accessToken } }
+  );
+  const d = await r.json();
+  return d.values || [];
+}
+
+// ── Refresh all ────────────────────────────────────────
+async function refreshAll() {
+  document.getElementById('refresh-btn').classList.add('spinning');
+  try {
+    const rows = await getSheetData();
+    updateLastMileage(rows);
+    checkOpenJourney(rows);
+  } catch(e) {
+    showToast('Could not load sheet data', 'error');
+  }
+  document.getElementById('refresh-btn').classList.remove('spinning');
+}
+
+// ── Last completed mileage ─────────────────────────────
+function updateLastMileage(rows) {
+  const display = document.getElementById('last-mileage-display');
+  // Find last row that has an end mileage (column C = index 2)
+  const completed = rows.slice(1).filter(r => r && r[2] && !isNaN(parseFloat(r[2])));
+  if (!completed.length) {
+    display.innerHTML = '<span class="last-loading">No completed journeys yet</span>';
+    return;
+  }
+  const last = completed[completed.length - 1];
+  const endMi = parseFloat(last[2]);
+  const date = last[0] || '';
+  const miles = last[4] ? Math.round(parseFloat(last[4])) : null;
+  display.innerHTML = `
+    <div><span class="last-mileage-num">${endMi.toLocaleString('en-GB')}</span><span class="last-mileage-unit">miles</span></div>
+    <div class="last-meta">Completed ${date}${miles !== null ? ' &nbsp;·&nbsp; ' + miles.toLocaleString() + ' miles that journey' : ''}</div>
+  `;
+}
+
+// ── Check for open journey ─────────────────────────────
+// An open journey = a row that has Start Mileage (col B) but no End Mileage (col C)
+function checkOpenJourney(rows) {
+  openJourneyRow = null;
+  for (let i = rows.length - 1; i >= 1; i--) {
+    const row = rows[i];
+    if (row && row[1] && !isNaN(parseFloat(row[1])) && (!row[2] || row[2].trim() === '')) {
+      openJourneyRow = i + 1; // convert to 1-based sheet row number
+      const startMi = parseFloat(row[1]);
+      const startDate = row[0] || '';
+      showEndPanel(startMi, startDate);
+      return;
+    }
+  }
+  showStartPanel();
+}
+
+function showStartPanel() {
+  document.getElementById('start-panel').style.display = 'flex';
+  document.getElementById('end-panel').style.display = 'none';
+  document.getElementById('start-input').value = '';
+  document.getElementById('start-btn').disabled = true;
+}
+
+function showEndPanel(startMi, startDate) {
+  document.getElementById('start-panel').style.display = 'none';
+  document.getElementById('end-panel').style.display = 'flex';
+  document.getElementById('open-start-mi').textContent = startMi.toLocaleString('en-GB');
+  // Show just time portion of date for compact display
+  const parts = startDate.split(', ');
+  document.getElementById('open-start-date').textContent = parts[1] || startDate;
+  document.getElementById('end-input').value = '';
+  document.getElementById('end-btn').disabled = true;
+  document.getElementById('end-warning').classList.remove('show');
+  document.getElementById('diff-preview').style.display = 'none';
+}
+
+// ── Input handlers ─────────────────────────────────────
+function onStartInput() {
+  const val = document.getElementById('start-input').value;
+  document.getElementById('start-btn').disabled = !val || isNaN(parseFloat(val));
+}
+
+function onEndInput() {
+  const endVal = parseFloat(document.getElementById('end-input').value);
+  const startVal = parseFloat(document.getElementById('open-start-mi').textContent.replace(/,/g, ''));
+  const warning = document.getElementById('end-warning');
+  const preview = document.getElementById('diff-preview');
+  const btn = document.getElementById('end-btn');
+
+  if (isNaN(endVal) || document.getElementById('end-input').value === '') {
+    warning.classList.remove('show');
+    preview.style.display = 'none';
+    btn.disabled = true;
+    return;
+  }
+  if (endVal <= startVal) {
+    warning.classList.add('show');
+    preview.style.display = 'none';
+    btn.disabled = true;
+    return;
+  }
+  warning.classList.remove('show');
+  const diff = Math.round(endVal - startVal);
+  document.getElementById('diff-preview-val').textContent = diff.toLocaleString();
+  preview.style.display = 'flex';
+  btn.disabled = false;
+}
+
+// ── Start journey ──────────────────────────────────────
+async function startJourney() {
+  const startMi = parseFloat(document.getElementById('start-input').value);
+  if (isNaN(startMi)) return;
+  const btn = document.getElementById('start-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+  const dateStr = new Date().toLocaleString('en-GB');
+  try {
+    // Append row with Date, Start Mileage — End Mileage and Miles left blank
+    await appendRow([dateStr, startMi, '', '', '']);
+    showToast('Journey started — safe travels!', 'success');
+    await refreshAll();
+  } catch(e) {
+    showToast('Error starting journey: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Start Journey';
+  }
+}
+
+// ── Complete journey ───────────────────────────────────
+async function completeJourney() {
+  const endMi = parseFloat(document.getElementById('end-input').value);
+  const startMi = parseFloat(document.getElementById('open-start-mi').textContent.replace(/,/g, ''));
+  if (isNaN(endMi) || endMi <= startMi || !openJourneyRow) return;
+  const diff = Math.round(endMi - startMi);
+  const endDate = new Date().toLocaleString('en-GB');
+  const btn = document.getElementById('end-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    // Update columns C (End Mileage), D (End Date), E (Miles Travelled) on the open row
+    await updateRow(openJourneyRow, endMi, endDate, diff);
+    showToast('Journey complete — ' + diff.toLocaleString() + ' miles logged!', 'success');
+    await refreshAll();
+  } catch(e) {
+    showToast('Error completing journey: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Complete Journey';
+  }
+}
+
+// ── Cancel journey ─────────────────────────────────────
+async function cancelJourney() {
+  if (!confirm('Are you sure you want to abandon this journey? The start entry will be deleted from the sheet.')) return;
+  if (!openJourneyRow) return;
+  try {
+    await deleteRow(openJourneyRow);
+    showToast('Journey cancelled', 'info');
+    await refreshAll();
+  } catch(e) {
+    showToast('Error cancelling: ' + e.message, 'error');
+  }
+}
+
+// ── Sheet API calls ────────────────────────────────────
+async function appendRow(values) {
+  const r = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}/values/A:E:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
+    { method: 'POST', headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [values] }) }
+  );
+  if (!r.ok) throw new Error('Append failed');
+}
+
+async function updateRow(rowNum, endMi, endDate, diff) {
+  // Write End Mileage to col C, End Date to col D, Miles Travelled to col E
+  const range = `C${rowNum}:E${rowNum}`;
+  const r = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}/values/${range}?valueInputOption=RAW`,
+    { method: 'PUT', headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [[endMi, endDate, diff]] }) }
+  );
+  if (!r.ok) throw new Error('Update failed');
+}
+
+async function deleteRow(rowNum) {
+  const r = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}:batchUpdate`,
+    {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requests: [{
+          deleteDimension: {
+            range: { sheetId: 0, dimension: 'ROWS', startIndex: rowNum - 1, endIndex: rowNum }
+          }
+        }]
+      })
+    }
+  );
+  if (!r.ok) throw new Error('Delete failed');
+}
+
+// ── Init ───────────────────────────────────────────────
+(function init() {
+  const hash = window.location.hash;
+  if (hash) {
+    const params = new URLSearchParams(hash.replace('#',''));
+    const token = params.get('access_token');
+    if (token) { handleToken(token); window.history.replaceState(null, '', window.location.pathname); return; }
+  }
+  const stored = sessionStorage.getItem('mileage_token');
+  if (stored) { handleToken(stored); }
+})();
+</script>
+
+<script>
+const manifest = {
+  name: 'Mileage Logger', short_name: 'Mileage',
+  description: 'Lease car mileage tracker for Ionmas Ltd',
+  start_url: window.location.href, display: 'standalone',
+  background_color: '#0f172a', theme_color: '#0f172a',
+  icons: [{ src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230f172a'/%3E%3Cpath d='M40 130h-16a16 16 0 0 1-16-16V50a16 16 0 0 1 16-16h88a16 16 0 0 1 16 16v24' stroke='%2338bdf8' stroke-width='16' stroke-linecap='round' fill='none'/%3E%3Crect x='72' y='88' width='112' height='80' rx='16' stroke='%2338bdf8' stroke-width='16' fill='none'/%3E%3Ccircle cx='96' cy='128' r='8' fill='%2338bdf8'/%3E%3Ccircle cx='160' cy='128' r='8' fill='%2338bdf8'/%3E%3C/svg%3E", sizes: '192x192', type: 'image/svg+xml' }]
+};
+const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+const u = URL.createObjectURL(blob); const lnk = document.createElement('link');
+lnk.rel = 'manifest'; lnk.href = u; document.head.appendChild(lnk);
+</script>
+
+</body>
+</html>
