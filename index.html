@@ -405,6 +405,7 @@ function showEndPanel(startMi, startDate) {
   document.getElementById('open-start-date').textContent = parts[1] || startDate;
   document.getElementById('end-input').value = '';
   document.getElementById('end-btn').disabled = true;
+  document.getElementById('end-btn').textContent = 'Complete Journey';
   document.getElementById('end-warning').classList.remove('show');
   document.getElementById('diff-preview').style.display = 'none';
 }
@@ -461,6 +462,7 @@ async function startJourney() {
     btn.disabled = false;
     btn.textContent = 'Start Journey';
   }
+  btn.textContent = 'Start Journey';
 }
 
 // ── Complete journey ───────────────────────────────────
