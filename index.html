@@ -426,12 +426,14 @@ function onEndInput() {
     warning.classList.remove('show');
     preview.style.display = 'none';
     btn.disabled = true;
+    btn.textContent = 'Complete Journey';
     return;
   }
   if (endVal <= startVal) {
     warning.classList.add('show');
     preview.style.display = 'none';
     btn.disabled = true;
+    btn.textContent = 'Complete Journey';
     return;
   }
   warning.classList.remove('show');
