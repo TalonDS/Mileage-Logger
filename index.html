@@ -1,45 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#0f172a" id="theme-meta">
 <title>Mileage Logger</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --navy: #0f172a; --accent: #38bdf8; --accent-dim: #0ea5e9;
+
+  /* ── Dark theme (default) ── */
+  :root, [data-theme="dark"] {
+    --bg: #0f172a; --accent: #38bdf8; --accent-dim: #0ea5e9;
     --text: #f1f5f9; --text-muted: #94a3b8; --text-dim: #64748b;
-    --surface: #1e293b; --surface2: #263348;
+    --surface: #1e293b; --surface2: #263348; --surface3: #2d3d55;
     --border: rgba(148,163,184,0.12);
     --success: #4ade80; --error: #f87171; --warning: #fbbf24;
     --radius: 16px; --radius-sm: 10px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    --spinner-bg: rgba(15,23,42,0.3); --spinner-top: #0f172a;
   }
-  html, body { height: 100%; background: var(--navy); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; overscroll-behavior: none; }
+
+  /* ── Light theme ── */
+  [data-theme="light"] {
+    --bg: #f1f5f9; --accent: #0284c7; --accent-dim: #0369a1;
+    --text: #0f172a; --text-muted: #475569; --text-dim: #94a3b8;
+    --surface: #ffffff; --surface2: #f8fafc; --surface3: #e2e8f0;
+    --border: rgba(15,23,42,0.1);
+    --success: #16a34a; --error: #dc2626; --warning: #d97706;
+    --shadow: 0 4px 16px rgba(0,0,0,0.1);
+    --spinner-bg: rgba(255,255,255,0.4); --spinner-top: #ffffff;
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; overscroll-behavior: none; transition: background 0.3s, color 0.3s; }
   body { display: flex; flex-direction: column; min-height: 100vh; min-height: -webkit-fill-available; }
   .app { flex: 1; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; width: 100%; padding: env(safe-area-inset-top, 20px) 20px env(safe-area-inset-bottom, 20px); gap: 0; }
 
-  /* Header */
+  /* ── Header ── */
   .header { padding: 24px 0 20px; display: flex; align-items: center; justify-content: space-between; }
   .header-left { display: flex; align-items: center; gap: 12px; }
-  .logo-mark { width: 42px; height: 42px; background: linear-gradient(135deg, var(--accent), var(--accent-dim)); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .logo-mark { width: 42px; height: 42px; background: linear-gradient(135deg, var(--accent), var(--accent-dim)); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .logo-mark svg { width: 22px; height: 22px; }
   .header-title { font-size: 17px; font-weight: 600; }
   .header-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
   .header-right { display: flex; align-items: center; gap: 8px; }
-  .refresh-btn { width: 34px; height: 34px; background: var(--surface); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
-  .refresh-btn:hover { background: var(--surface2); }
-  .refresh-btn svg { width: 15px; height: 15px; stroke: var(--text-muted); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .refresh-btn.spinning svg { animation: spin 0.8s linear infinite; }
+
+  .icon-btn { width: 34px; height: 34px; background: var(--surface); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .icon-btn:hover { background: var(--surface2); }
+  .icon-btn svg { width: 15px; height: 15px; stroke: var(--text-muted); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-btn.spinning svg { animation: spin 0.8s linear infinite; }
+
   .user-pill { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 5px 10px 5px 6px; cursor: pointer; transition: background 0.2s; }
   .user-pill:hover { background: var(--surface2); }
-  .user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--navy); }
+  .user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; }
   .user-pill-name { font-size: 12px; color: var(--text-muted); max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  /* Sign in */
+  /* ── Sign in ── */
   #signin-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding-bottom: 60px; }
   .signin-icon { width: 80px; height: 80px; background: var(--surface); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; border: 1px solid var(--border); }
   .signin-icon svg { width: 40px; height: 40px; }
@@ -48,29 +66,39 @@
   .google-btn { display: flex; align-items: center; gap: 10px; background: #fff; color: #1f1f1f; border: none; border-radius: 12px; padding: 14px 24px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: transform 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.25); width: 100%; max-width: 300px; justify-content: center; }
   .google-btn:active { transform: scale(0.97); }
 
-  /* Main */
-  #main-screen { flex: 1; display: none; flex-direction: column; gap: 14px; }
+  /* ── Main ── */
+  #main-screen { flex: 1; display: none; flex-direction: column; gap: 14px; padding-bottom: 20px; }
 
-  /* Date card */
+  /* ── Date card ── */
   .date-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
-  .date-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 4px; }
+  .card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 4px; }
   .date-value { font-size: 15px; font-weight: 500; }
   .date-time { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
 
-  /* Last mileage */
+  /* ── Monthly summary card ── */
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+  .summary-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .summary-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
+  .summary-month { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .summary-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
+  .summary-num { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; line-height: 1; }
+  .summary-lbl { font-size: 10px; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .export-btn { width: 100%; margin-top: 12px; padding: 10px; background: transparent; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s, border-color 0.2s; }
+  .export-btn:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .export-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── Last mileage card ── */
   .last-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
   .last-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .last-card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
   .last-card-tag { font-size: 10px; background: rgba(56,189,248,0.1); color: var(--accent); border-radius: 6px; padding: 2px 8px; border: 1px solid rgba(56,189,248,0.2); }
   .last-mileage-num { font-size: 36px; font-weight: 800; color: var(--text); letter-spacing: -1px; line-height: 1; }
   .last-mileage-unit { font-size: 14px; color: var(--text-muted); margin-left: 4px; }
   .last-meta { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
   .last-loading { font-size: 14px; color: var(--text-dim); font-style: italic; }
 
-  /* Journey panels */
+  /* ── Journey panels ── */
   .journey-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-
-  /* Status banner */
   .status-banner { border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
   .status-banner.open { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); color: var(--warning); }
   .status-banner.ready { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.2); color: var(--accent); }
@@ -79,14 +107,12 @@
   .status-dot.ready { background: var(--accent); }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-  /* Info row (shows start details when completing) */
   .info-row { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px 14px; }
   .info-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 6px; }
   .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .info-item-label { font-size: 11px; color: var(--text-dim); margin-bottom: 2px; }
   .info-item-value { font-size: 18px; font-weight: 700; color: var(--text-muted); }
 
-  /* Input */
   .input-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 8px; }
   .input-wrap { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; transition: border-color 0.2s; }
   .input-wrap:focus-within { border-color: var(--accent); }
@@ -94,43 +120,39 @@
   .mileage-input::-webkit-outer-spin-button, .mileage-input::-webkit-inner-spin-button { -webkit-appearance: none; }
   .mileage-input::placeholder { color: var(--text-dim); font-weight: 400; font-size: 24px; }
 
-  /* Calculated diff display */
   .diff-preview { background: linear-gradient(135deg, #0c4a6e 0%, #0f172a 100%); border: 1px solid rgba(56,189,248,0.2); border-radius: var(--radius-sm); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
-  .diff-preview-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(148,163,184,0.6); margin-bottom: 4px; }
+  [data-theme="light"] .diff-preview { background: linear-gradient(135deg, #e0f2fe, #bae6fd); }
+  .diff-preview-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(148,163,184,0.8); margin-bottom: 4px; }
+  [data-theme="light"] .diff-preview-label { color: var(--accent-dim); }
   .diff-preview-val { font-size: 28px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
   .diff-preview-unit { font-size: 13px; color: var(--text-muted); }
 
-  /* Warning */
   .warning-box { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--error); display: none; }
   .warning-box.show { display: block; }
 
-  /* Buttons */
-  .btn-primary { width: 100%; padding: 16px; background: var(--accent); color: var(--navy); border: none; border-radius: var(--radius-sm); font-size: 16px; font-weight: 700; cursor: pointer; transition: transform 0.15s, opacity 0.2s; }
+  .btn-primary { width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 16px; font-weight: 700; cursor: pointer; transition: transform 0.15s, opacity 0.2s; }
   .btn-primary:not(:disabled):active { transform: scale(0.97); }
   .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
-  .btn-primary.danger { background: var(--error); color: #fff; }
   .btn-secondary { width: 100%; padding: 13px; background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
   .btn-secondary:hover { background: var(--surface2); }
 
-  /* Toast */
-  .toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; font-size: 14px; font-weight: 500; white-space: nowrap; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s; opacity: 0; z-index: 100; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+  .toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; font-size: 14px; font-weight: 500; white-space: nowrap; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s; opacity: 0; z-index: 100; box-shadow: var(--shadow); }
   .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
   .toast.success { border-color: rgba(74,222,128,0.3); color: var(--success); }
   .toast.error { border-color: rgba(248,113,113,0.3); color: var(--error); }
   .toast.info { border-color: rgba(56,189,248,0.3); color: var(--accent); }
 
-  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(15,23,42,0.3); border-top-color: var(--navy); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--spinner-bg); border-top-color: var(--spinner-top); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- Header -->
   <div class="header">
     <div class="header-left">
       <div class="logo-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/>
           <rect x="9" y="11" width="14" height="10" rx="2"/>
           <circle cx="12" cy="16" r="1"/><circle cx="20" cy="16" r="1"/>
@@ -142,9 +164,15 @@
       </div>
     </div>
     <div class="header-right">
-      <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()" style="display:none" title="Refresh">
+      <!-- Theme toggle -->
+      <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" style="display:none" title="Toggle theme">
+        <svg id="theme-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <!-- Refresh -->
+      <button class="icon-btn" id="refresh-btn" onclick="refreshAll()" style="display:none" title="Refresh">
         <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
       </button>
+      <!-- User -->
       <div id="user-pill" class="user-pill" style="display:none" onclick="signOut()">
         <div class="user-avatar" id="user-initial">D</div>
         <span class="user-pill-name" id="user-name-label">Daniel</span>
@@ -152,7 +180,7 @@
     </div>
   </div>
 
-  <!-- Sign in screen -->
+  <!-- Sign in -->
   <div id="signin-screen">
     <div class="signin-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round">
@@ -174,22 +202,48 @@
     </button>
   </div>
 
-  <!-- Main screen -->
+  <!-- Main -->
   <div id="main-screen">
 
     <!-- Date/time -->
     <div class="date-card">
       <div>
-        <div class="date-label">Today</div>
+        <div class="card-label">Today</div>
         <div class="date-value" id="date-str">—</div>
       </div>
       <div class="date-time" id="time-str">—</div>
     </div>
 
+    <!-- Monthly summary -->
+    <div class="summary-card">
+      <div class="summary-header">
+        <span class="card-label">Monthly summary</span>
+        <span class="summary-month" id="summary-month">—</span>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-num" id="summary-miles">—</div>
+          <div class="summary-lbl">Miles</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-num" id="summary-trips">—</div>
+          <div class="summary-lbl">Journeys</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-num" id="summary-avg">—</div>
+          <div class="summary-lbl">Avg miles</div>
+        </div>
+      </div>
+      <button class="export-btn" onclick="exportCSV()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export all data as CSV
+      </button>
+    </div>
+
     <!-- Last completed mileage -->
     <div class="last-card">
       <div class="last-card-header">
-        <span class="last-card-title">Last completed mileage</span>
+        <span class="card-label">Last completed mileage</span>
         <span class="last-card-tag">Live from sheet</span>
       </div>
       <div id="last-mileage-display">
@@ -197,7 +251,7 @@
       </div>
     </div>
 
-    <!-- START JOURNEY PANEL -->
+    <!-- Start panel -->
     <div class="journey-panel" id="start-panel">
       <div class="status-banner ready">
         <div class="status-dot ready"></div>
@@ -212,14 +266,12 @@
       <button class="btn-primary" id="start-btn" onclick="startJourney()" disabled>Start Journey</button>
     </div>
 
-    <!-- COMPLETE JOURNEY PANEL (hidden until open journey found) -->
+    <!-- End panel -->
     <div class="journey-panel" id="end-panel" style="display:none">
       <div class="status-banner open">
         <div class="status-dot open"></div>
         Journey in progress — please enter end mileage
       </div>
-
-      <!-- Read-only start details -->
       <div class="info-row">
         <div class="info-label">Journey started</div>
         <div class="info-grid">
@@ -233,19 +285,13 @@
           </div>
         </div>
       </div>
-
-      <!-- End mileage input -->
       <div>
         <div class="input-label">End mileage</div>
         <div class="input-wrap">
           <input class="mileage-input" type="number" id="end-input" placeholder="Enter mileage" inputmode="numeric" oninput="onEndInput()">
         </div>
       </div>
-
-      <!-- Warning -->
       <div class="warning-box" id="end-warning">⚠ End mileage must be greater than start mileage</div>
-
-      <!-- Calculated diff -->
       <div class="diff-preview" id="diff-preview" style="display:none">
         <div>
           <div class="diff-preview-label">Miles this journey</div>
@@ -254,7 +300,6 @@
         </div>
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.3"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
       </div>
-
       <button class="btn-primary" id="end-btn" onclick="completeJourney()" disabled>Complete Journey</button>
       <button class="btn-secondary" onclick="cancelJourney()">Cancel / Abandon Journey</button>
     </div>
@@ -271,7 +316,31 @@ const FIXED_SHEET_ID = '1hMNdD5ur7rgmd-fVlnPtArvcR-zo9bw3BRgTITWTJ4A';
 const REDIRECT_URI = window.location.href.split('?')[0].split('#')[0];
 
 let accessToken = null;
-let openJourneyRow = null; // row index (1-based) of the open journey in the sheet
+let openJourneyRow = null;
+let allRows = [];
+
+// ── Theme ──────────────────────────────────────────────
+function initTheme() {
+  const saved = localStorage.getItem('mileage_theme') || 'dark';
+  setTheme(saved);
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('mileage_theme', theme);
+  document.getElementById('theme-meta').content = theme === 'dark' ? '#0f172a' : '#f1f5f9';
+  const icon = document.getElementById('theme-icon');
+  if (theme === 'dark') {
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  } else {
+    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  setTheme(current === 'dark' ? 'light' : 'dark');
+}
 
 // ── Clock ──────────────────────────────────────────────
 function updateClock() {
@@ -306,6 +375,7 @@ function signOut() {
   document.getElementById('main-screen').style.display = 'none';
   document.getElementById('user-pill').style.display = 'none';
   document.getElementById('refresh-btn').style.display = 'none';
+  document.getElementById('theme-btn').style.display = 'none';
 }
 
 async function getUserInfo() {
@@ -326,27 +396,25 @@ function handleToken(token) {
   document.getElementById('main-screen').style.display = 'flex';
   document.getElementById('main-screen').style.flexDirection = 'column';
   document.getElementById('refresh-btn').style.display = 'flex';
+  document.getElementById('theme-btn').style.display = 'flex';
   getUserInfo();
   refreshAll();
 }
 
-// ── Sheet helpers ──────────────────────────────────────
+// ── Sheet data ─────────────────────────────────────────
 async function getSheetData() {
-  const r = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}/values/A:E`,
-    { headers: { Authorization: 'Bearer ' + accessToken } }
-  );
+  const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}/values/A:E`, { headers: { Authorization: 'Bearer ' + accessToken } });
   const d = await r.json();
   return d.values || [];
 }
 
-// ── Refresh all ────────────────────────────────────────
 async function refreshAll() {
   document.getElementById('refresh-btn').classList.add('spinning');
   try {
-    const rows = await getSheetData();
-    updateLastMileage(rows);
-    checkOpenJourney(rows);
+    allRows = await getSheetData();
+    updateLastMileage(allRows);
+    updateMonthlySummary(allRows);
+    checkOpenJourney(allRows);
   } catch(e) {
     showToast('Could not load sheet data', 'error');
   }
@@ -356,15 +424,11 @@ async function refreshAll() {
 // ── Last completed mileage ─────────────────────────────
 function updateLastMileage(rows) {
   const display = document.getElementById('last-mileage-display');
-  // Find last row that has an end mileage (column C = index 2)
   const completed = rows.slice(1).filter(r => r && r[2] && !isNaN(parseFloat(r[2])));
-  if (!completed.length) {
-    display.innerHTML = '<span class="last-loading">No completed journeys yet</span>';
-    return;
-  }
+  if (!completed.length) { display.innerHTML = '<span class="last-loading">No completed journeys yet</span>'; return; }
   const last = completed[completed.length - 1];
   const endMi = parseFloat(last[2]);
-  const date = last[0] || '';
+  const date = last[3] || last[0] || '';
   const miles = last[4] ? Math.round(parseFloat(last[4])) : null;
   display.innerHTML = `
     <div><span class="last-mileage-num">${endMi.toLocaleString('en-GB')}</span><span class="last-mileage-unit">miles</span></div>
@@ -372,17 +436,58 @@ function updateLastMileage(rows) {
   `;
 }
 
-// ── Check for open journey ─────────────────────────────
-// An open journey = a row that has Start Mileage (col B) but no End Mileage (col C)
+// ── Monthly summary ────────────────────────────────────
+function updateMonthlySummary(rows) {
+  const now = new Date();
+  const thisMonth = now.getMonth();
+  const thisYear = now.getFullYear();
+
+  // Filter completed rows (have end mileage) for this month
+  const completed = rows.slice(1).filter(r => {
+    if (!r || !r[2] || isNaN(parseFloat(r[2]))) return false;
+    // Parse date from col A (start date) e.g. "03/05/2026, 19:15:55"
+    const dateStr = r[0] || '';
+    const parts = dateStr.split('/');
+    if (parts.length < 3) return false;
+    const d = parseInt(parts[0]);
+    const m = parseInt(parts[1]) - 1;
+    const y = parseInt(parts[2]);
+    return m === thisMonth && y === thisYear;
+  });
+
+  const totalMiles = completed.reduce((sum, r) => sum + (r[4] ? Math.round(parseFloat(r[4])) : 0), 0);
+  const trips = completed.length;
+  const avg = trips > 0 ? Math.round(totalMiles / trips) : 0;
+
+  document.getElementById('summary-month').textContent = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  document.getElementById('summary-miles').textContent = totalMiles > 0 ? totalMiles.toLocaleString() : '0';
+  document.getElementById('summary-trips').textContent = trips;
+  document.getElementById('summary-avg').textContent = avg > 0 ? avg.toLocaleString() : '0';
+}
+
+// ── CSV Export ─────────────────────────────────────────
+function exportCSV() {
+  if (!allRows.length) { showToast('No data to export', 'info'); return; }
+  const csv = allRows.map(row => row.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const now = new Date();
+  a.href = url;
+  a.download = `MileageLog_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV downloaded!', 'success');
+}
+
+// ── Open journey check ─────────────────────────────────
 function checkOpenJourney(rows) {
   openJourneyRow = null;
   for (let i = rows.length - 1; i >= 1; i--) {
     const row = rows[i];
     if (row && row[1] && !isNaN(parseFloat(row[1])) && (!row[2] || row[2].trim() === '')) {
-      openJourneyRow = i + 1; // convert to 1-based sheet row number
-      const startMi = parseFloat(row[1]);
-      const startDate = row[0] || '';
-      showEndPanel(startMi, startDate);
+      openJourneyRow = i + 1;
+      showEndPanel(parseFloat(row[1]), row[0] || '');
       return;
     }
   }
@@ -394,13 +499,13 @@ function showStartPanel() {
   document.getElementById('end-panel').style.display = 'none';
   document.getElementById('start-input').value = '';
   document.getElementById('start-btn').disabled = true;
+  document.getElementById('start-btn').textContent = 'Start Journey';
 }
 
 function showEndPanel(startMi, startDate) {
   document.getElementById('start-panel').style.display = 'none';
   document.getElementById('end-panel').style.display = 'flex';
   document.getElementById('open-start-mi').textContent = startMi.toLocaleString('en-GB');
-  // Show just time portion of date for compact display
   const parts = startDate.split(', ');
   document.getElementById('open-start-date').textContent = parts[1] || startDate;
   document.getElementById('end-input').value = '';
@@ -422,20 +527,13 @@ function onEndInput() {
   const warning = document.getElementById('end-warning');
   const preview = document.getElementById('diff-preview');
   const btn = document.getElementById('end-btn');
-
   if (isNaN(endVal) || document.getElementById('end-input').value === '') {
-    warning.classList.remove('show');
-    preview.style.display = 'none';
-    btn.disabled = true;
-    btn.textContent = 'Complete Journey';
-    return;
+    warning.classList.remove('show'); preview.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Complete Journey'; return;
   }
   if (endVal <= startVal) {
-    warning.classList.add('show');
-    preview.style.display = 'none';
-    btn.disabled = true;
-    btn.textContent = 'Complete Journey';
-    return;
+    warning.classList.add('show'); preview.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Complete Journey'; return;
   }
   warning.classList.remove('show');
   const diff = Math.round(endVal - startVal);
@@ -449,18 +547,14 @@ async function startJourney() {
   const startMi = parseFloat(document.getElementById('start-input').value);
   if (isNaN(startMi)) return;
   const btn = document.getElementById('start-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
   const dateStr = new Date().toLocaleString('en-GB');
   try {
-    // Append row with Date, Start Mileage — End Mileage and Miles left blank
     await appendRow([dateStr, startMi, '', '', '']);
     showToast('Journey started — safe travels!', 'success');
     await refreshAll();
   } catch(e) {
     showToast('Error starting journey: ' + e.message, 'error');
-    btn.disabled = false;
-    btn.textContent = 'Start Journey';
   }
   btn.textContent = 'Start Journey';
 }
@@ -473,17 +567,14 @@ async function completeJourney() {
   const diff = Math.round(endMi - startMi);
   const endDate = new Date().toLocaleString('en-GB');
   const btn = document.getElementById('end-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
   try {
-    // Update columns C (End Mileage), D (End Date), E (Miles Travelled) on the open row
     await updateRow(openJourneyRow, endMi, endDate, diff);
     showToast('Journey complete — ' + diff.toLocaleString() + ' miles logged!', 'success');
     await refreshAll();
   } catch(e) {
     showToast('Error completing journey: ' + e.message, 'error');
-    btn.disabled = false;
-    btn.textContent = 'Complete Journey';
+    btn.disabled = false; btn.textContent = 'Complete Journey';
   }
 }
 
@@ -495,12 +586,10 @@ async function cancelJourney() {
     await deleteRow(openJourneyRow);
     showToast('Journey cancelled', 'info');
     await refreshAll();
-  } catch(e) {
-    showToast('Error cancelling: ' + e.message, 'error');
-  }
+  } catch(e) { showToast('Error cancelling: ' + e.message, 'error'); }
 }
 
-// ── Sheet API calls ────────────────────────────────────
+// ── Sheet API ──────────────────────────────────────────
 async function appendRow(values) {
   const r = await fetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}/values/A:E:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
@@ -510,48 +599,32 @@ async function appendRow(values) {
 }
 
 async function updateRow(rowNum, endMi, endDate, diff) {
-  // Write End Mileage to col C, End Date to col D, Miles Travelled to col E
-  const range = `C${rowNum}:E${rowNum}`;
   const r = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}/values/${range}?valueInputOption=RAW`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}/values/C${rowNum}:E${rowNum}?valueInputOption=RAW`,
     { method: 'PUT', headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [[endMi, endDate, diff]] }) }
   );
   if (!r.ok) throw new Error('Update failed');
 }
 
 async function getFirstSheetId() {
-  const r = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}?fields=sheets.properties`,
-    { headers: { Authorization: 'Bearer ' + accessToken } }
-  );
+  const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}?fields=sheets.properties`, { headers: { Authorization: 'Bearer ' + accessToken } });
   const d = await r.json();
   return d.sheets[0].properties.sheetId;
 }
 
 async function deleteRow(rowNum) {
   const sheetTabId = await getFirstSheetId();
-  const r = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}:batchUpdate`,
-    {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        requests: [{
-          deleteDimension: {
-            range: { sheetId: sheetTabId, dimension: 'ROWS', startIndex: rowNum - 1, endIndex: rowNum }
-          }
-        }]
-      })
-    }
-  );
-  if (!r.ok) {
-    const err = await r.json();
-    throw new Error(err.error?.message || 'Delete failed');
-  }
+  const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${FIXED_SHEET_ID}:batchUpdate`, {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ requests: [{ deleteDimension: { range: { sheetId: sheetTabId, dimension: 'ROWS', startIndex: rowNum - 1, endIndex: rowNum } } }] })
+  });
+  if (!r.ok) { const err = await r.json(); throw new Error(err.error?.message || 'Delete failed'); }
 }
 
 // ── Init ───────────────────────────────────────────────
 (function init() {
+  initTheme();
   const hash = window.location.hash;
   if (hash) {
     const params = new URLSearchParams(hash.replace('#',''));
@@ -575,6 +648,5 @@ const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
 const u = URL.createObjectURL(blob); const lnk = document.createElement('link');
 lnk.rel = 'manifest'; lnk.href = u; document.head.appendChild(lnk);
 </script>
-
 </body>
 </html>
