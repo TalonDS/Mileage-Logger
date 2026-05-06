@@ -229,32 +229,6 @@
       <div class="date-time" id="time-str">—</div>
     </div>
 
-    <!-- Monthly summary -->
-    <div class="summary-card">
-      <div class="summary-header">
-        <span class="card-label">Monthly summary</span>
-        <span class="summary-month" id="summary-month">—</span>
-      </div>
-      <div class="summary-grid">
-        <div class="summary-item">
-          <div class="summary-num" id="summary-miles">—</div>
-          <div class="summary-lbl">Miles</div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-num" id="summary-trips">—</div>
-          <div class="summary-lbl">Journeys</div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-num" id="summary-avg">—</div>
-          <div class="summary-lbl">Avg miles</div>
-        </div>
-      </div>
-      <button class="export-btn" onclick="exportCSV()">
-        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export all data as CSV
-      </button>
-    </div>
-
     <!-- Last completed mileage -->
     <div class="last-card">
       <div class="last-card-header">
@@ -317,6 +291,33 @@
       </div>
       <button class="btn-primary" id="end-btn" onclick="completeJourney()" disabled>Complete Journey</button>
       <button class="btn-secondary" onclick="cancelJourney()">Cancel / Abandon Journey</button>
+    </div>
+
+
+    <!-- Monthly summary -->
+    <div class="summary-card">
+      <div class="summary-header">
+        <span class="card-label">Monthly summary</span>
+        <span class="summary-month" id="summary-month">—</span>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-num" id="summary-miles">—</div>
+          <div class="summary-lbl">Miles</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-num" id="summary-trips">—</div>
+          <div class="summary-lbl">Journeys</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-num" id="summary-avg">—</div>
+          <div class="summary-lbl">Avg miles</div>
+        </div>
+      </div>
+      <button class="export-btn" onclick="exportCSV()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export all data as CSV
+      </button>
     </div>
 
   </div>
